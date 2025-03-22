@@ -1,0 +1,10 @@
+flask==2.3.3
+torch==2.0.1
+torchvision==0.15.2
+numpy==1.24.3
+trimesh==3.23.5
+transformers==4.31.0
+pillow==10.0.0
+gunicorn==21.2.0
+Werkzeug==2.3.7
+git+https://github.com/openai/shap-e.git 
