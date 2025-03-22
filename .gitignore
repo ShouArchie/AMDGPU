@@ -2,7 +2,11 @@
 __pycache__/
 *.py[cod]
 *$py.class
+
+# C extensions
 *.so
+
+# Distribution / packaging
 .Python
 env/
 build/
@@ -16,9 +20,48 @@ lib64/
 parts/
 sdist/
 var/
+wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Model caches and outputs
+shap_e_model_cache/
+outputs/
+
+# Keep the Shap-E code but exclude its test data and cache dirs
+shap-e/shap_e/models/download_cache/
+shap-e/shap_e/examples/
+shap-e/test_data/
+shap-e/.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
 
 # Virtual Environment
 venv/
@@ -28,12 +71,9 @@ uoftGPU_env/
 .venv/
 
 # Generated files
-outputs/
 *.stl
 
 # IDE
-.idea/
-.vscode/
 *.swp
 *.swo
 

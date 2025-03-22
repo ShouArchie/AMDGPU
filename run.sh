@@ -52,13 +52,6 @@ if [ $? -ne 0 ]; then
   echo "Warning: Some dependencies may have failed to install"
 fi
 
-# Install Shap-E directly from GitHub
-echo "Ensuring Shap-E is installed correctly..."
-pip install git+https://github.com/openai/shap-e.git
-if [ $? -ne 0 ]; then
-  echo "Warning: Shap-E installation may have issues"
-fi
-
 # Define Python script based on platform - use platform_ready.py for AMD GPUs
 divider
 echo "DETECTED PLATFORM: $PLATFORM"

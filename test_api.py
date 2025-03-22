@@ -7,6 +7,7 @@ import json
 def main():
     parser = argparse.ArgumentParser(description="Test the Shap-E Text-to-3D API")
     parser.add_argument("--url", type=str, default="http://localhost:8000", help="URL of the API")
+    parser.add_argument("--job_id", type=str, help="Job ID for the /site/ format (if using AMD platform)")
     parser.add_argument("--prompt", type=str, default="A detailed unicorn", help="Text prompt for generating the 3D model")
     parser.add_argument("--output", type=str, default="output.stl", help="Output file name")
     parser.add_argument("--guidance_scale", type=float, default=15.0, help="Guidance scale for generation")
@@ -22,13 +23,21 @@ def main():
         "num_steps": args.num_steps
     }
     
-    print(f"Sending request to {args.url}/generate")
+    # Format the URL properly based on whether we're using the AMD platform or direct access
+    api_url = args.url
+    if args.job_id:
+        # Format for AMD platform: http://100.66.69.43:5000/site/[job_id]
+        if not api_url.endswith('/'):
+            api_url += '/'
+        api_url = f"{api_url}site/{args.job_id}"
+    
+    print(f"Sending request to {api_url}/generate")
     print(f"Prompt: '{args.prompt}'")
     print(f"Parameters: guidance_scale={args.guidance_scale}, num_steps={args.num_steps}")
     
     # Check health endpoint first
     try:
-        health_response = requests.get(f"{args.url}/health")
+        health_response = requests.get(f"{api_url}/health", timeout=30)
         if health_response.status_code == 200:
             print("Health check successful ✓")
         else:
@@ -44,10 +53,11 @@ def main():
             print(f"Request payload: {json.dumps(payload, indent=2)}")
         
         response = requests.post(
-            f"{args.url}/generate", 
+            f"{api_url}/generate", 
             json=payload, 
             headers={"Content-Type": "application/json"},
-            stream=True  # Stream the response to handle large files
+            stream=True,  # Stream the response to handle large files
+            timeout=120   # Increased timeout for the AMD platform
         )
         
         if response.status_code == 200:
