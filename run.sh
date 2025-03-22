@@ -41,6 +41,10 @@ echo "SETTING UP ENVIRONMENT:"
 mkdir -p outputs
 echo "Created outputs directory"
 
+# Create model cache directory
+mkdir -p shap_e_model_cache
+echo "Created model cache directory"
+
 # Install dependencies
 echo "Installing Python dependencies..."
 pip install -r requirements.txt
@@ -75,4 +79,11 @@ divider
 echo "STARTING FLASK APPLICATION WITH: python $SCRIPT"
 echo "The application will be available at http://localhost:8000"
 divider
+
+# Export PYTORCH_HF_CACHE_HOME to use our local cache directory
+export PYTORCH_HF_CACHE_HOME="$(pwd)/shap_e_model_cache"
+export HF_HOME="$(pwd)/shap_e_model_cache"
+export TRANSFORMERS_CACHE="$(pwd)/shap_e_model_cache"
+
+# Run the app
 python $SCRIPT 
