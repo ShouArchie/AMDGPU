@@ -55,34 +55,69 @@ def check_gpu_compatibility():
     # Try to detect platform type
     platform_gpu_type = "unknown"
     try:
-        # Check for AMD GPUs via ROCm (if NVIDIA not found)
-        if hasattr(torch, 'version') and hasattr(torch.version, 'hip') and torch.version.hip is not None:
-            platform_gpu_type = "amd"
-            logger.info("AMD ROCm platform detected")
-            device = torch.device('cuda:0')  # ROCm uses CUDA device naming
-            logger.info("Selected AMD GPU for processing")
+        # Print detailed PyTorch build information
+        logger.info(f"PyTorch version: {torch.__version__}")
+        logger.info(f"PyTorch build details: {torch.__config__.show()}")
+        
+        # Check if we're using AMD ROCm build
+        has_rocm = False
+        if hasattr(torch.version, 'hip') and torch.version.hip is not None:
+            has_rocm = True
+            logger.info(f"PyTorch ROCm version: {torch.version.hip}")
+        else:
+            logger.info("PyTorch does not have ROCm support compiled")
+        
+        # Check for AMD GPUs via ROCm
+        if has_rocm:
+            try:
+                platform_gpu_type = "amd"
+                logger.info("AMD ROCm platform detected")
+                device = torch.device('cuda:0')  # ROCm uses CUDA device naming
+                
+                # Test tensor creation on GPU to confirm it works
+                test_tensor = torch.zeros(1, device=device)
+                logger.info(f"Test tensor created on {device}: {test_tensor}")
+                
+                # Get device properties if possible
+                if hasattr(torch.cuda, 'get_device_properties'):
+                    props = torch.cuda.get_device_properties(0)
+                    logger.info(f"AMD GPU: {props.name}, Memory: {props.total_memory / 1024**3:.1f} GB")
+                
+                logger.info("Selected AMD GPU for processing")
+                return platform_gpu_type
+            except Exception as e:
+                logger.error(f"Error setting up AMD GPU: {str(e)}")
+                logger.warning("Falling back to other GPU detection methods")
+                
         # Check for NVIDIA GPUs second
-        elif torch.cuda.is_available():
-            torch.cuda.empty_cache()
-            platform_gpu_type = "nvidia"
-            logger.info(f"Found {torch.cuda.device_count()} NVIDIA CUDA device(s)")
-            
-            # List available NVIDIA GPUs
-            for i in range(torch.cuda.device_count()):
-                name = torch.cuda.get_device_name(i)
-                mem = torch.cuda.get_device_properties(i).total_memory / 1024**3
-                logger.info(f"  • GPU {i}: {name} ({mem:.1f} GB memory)")
-            
-            # Select first NVIDIA GPU
-            device = torch.device('cuda:0')
-            logger.info(f"Selected {torch.cuda.get_device_name(0)} for processing")
+        if torch.cuda.is_available():
+            try:
+                torch.cuda.empty_cache()
+                platform_gpu_type = "nvidia"
+                logger.info(f"Found {torch.cuda.device_count()} NVIDIA CUDA device(s)")
+                
+                # List available NVIDIA GPUs
+                for i in range(torch.cuda.device_count()):
+                    name = torch.cuda.get_device_name(i)
+                    mem = torch.cuda.get_device_properties(i).total_memory / 1024**3
+                    logger.info(f"  • GPU {i}: {name} ({mem:.1f} GB memory)")
+                
+                # Select first NVIDIA GPU
+                device = torch.device('cuda:0')
+                logger.info(f"Selected {torch.cuda.get_device_name(0)} for processing")
+                return platform_gpu_type
+            except Exception as e:
+                logger.error(f"Error setting up NVIDIA GPU: {str(e)}")
+                logger.warning("Falling back to CPU")
         else:
             logger.info("No compatible GPUs found, using CPU")
+            
     except Exception as e:
         logger.error(f"Error during GPU detection: {str(e)}")
         logger.info("Falling back to CPU")
     
-    logger.info(f"Selected device: {device}")
+    device = torch.device('cpu')
+    logger.info(f"Using CPU for processing")
     return platform_gpu_type
 
 # Detect and configure GPU

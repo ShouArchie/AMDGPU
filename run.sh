@@ -30,6 +30,10 @@ if command -v rocminfo &> /dev/null; then
   echo "AMD GPU detected (ROCm available)"
   rocminfo | grep -E "Name:|Marketing"
   PLATFORM="amd"
+  # Set AMD specific environment variables
+  export HSA_OVERRIDE_GFX_VERSION=10.3.0
+  export ROCR_VISIBLE_DEVICES=0
+  export HIP_VISIBLE_DEVICES=0
 elif [ "$PLATFORM" != "nvidia" ]; then
   echo "AMD GPU not detected or ROCm not installed"
   PLATFORM="cpu"
@@ -60,6 +64,9 @@ SCRIPT="main.py"
 if [ "$PLATFORM" = "amd" ]; then
   echo "Using platform_ready.py for AMD GPU support"
   SCRIPT="platform_ready.py"
+  # Print ROCm information
+  echo "ROCm version information:"
+  python -c "import torch; print('PyTorch ROCm version:', torch.version.hip if hasattr(torch.version, 'hip') else 'Not installed')"
 elif [ "$PLATFORM" = "nvidia" ]; then
   echo "Using main.py for NVIDIA GPU support"
 else

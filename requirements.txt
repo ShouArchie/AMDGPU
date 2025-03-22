@@ -1,6 +1,7 @@
 flask==2.3.3
-torch==2.0.1
-torchvision==0.15.2
+--extra-index-url https://download.pytorch.org/whl/rocm5.4.2
+torch==2.0.1+rocm5.4.2
+torchvision==0.15.2+rocm5.4.2
 numpy==1.24.3
 trimesh==3.23.5
 transformers==4.31.0
